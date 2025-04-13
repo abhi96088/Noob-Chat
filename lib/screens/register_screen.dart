@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:noob_chat/providers/flag_provider.dart';
 import 'package:noob_chat/screens/login_screen.dart';
+import 'package:noob_chat/utils/app_colors.dart';
+import 'package:noob_chat/widget/custom_buttons.dart';
+import 'package:noob_chat/widget/custom_snackbar.dart';
+import 'package:noob_chat/widget/custom_textfield.dart';
+import 'package:noob_chat/widget/custom_texts.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -11,127 +18,83 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  // controllers to handle text inside text fields
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmController = TextEditingController();
 
-  bool isLoading = false;
-
-  void handleRegister() async {
+  ///______________________ Function to handle user registration ____________________________///
+  void handleRegister(FlagProvider provider) async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final confirm = confirmController.text.trim();
 
     if (password != confirm) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      CustomSnackBar.showSnackBar(
+          context: context, message: 'Passwords do not match');
       return;
     }
 
-    setState(() => isLoading = true);
+    provider.toggleLoading();
+
     final user = await AuthService().register(email, password);
-    setState(() => isLoading = false);
+
+    provider.toggleLoading();
 
     if (user != null) {
-      // Navigate to home/chat screen
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration failed')),
-      );
+      CustomSnackBar.showSnackBar(
+          context: context, message: 'Registration failed');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<FlagProvider>();
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Text(
-                  'Create Account',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF2E8BFF),
-                  ),
+                CustomText.titleText(
+                  text: 'Create Account',
                 ),
                 const SizedBox(height: 40),
-                TextField(
+                CustomTextField(
                   controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  labelText: "Email",
+                  icon: Icon(Icons.email),
                 ),
                 const SizedBox(height: 20),
-                TextField(
+                CustomTextField(
                   controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  labelText: "Password",
+                  icon: Icon(Icons.lock),
+                  isPassword: true,
                 ),
                 const SizedBox(height: 20),
-                TextField(
+                CustomTextField(
                   controller: confirmController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  labelText: "Confirm Password",
+                  icon: Icon(Icons.lock_outline),
                 ),
                 const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: handleRegister,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E8BFF),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: isLoading
+                CustomButtons.primaryButton(
+                    onPressed: () => handleRegister(provider),
+                    child: provider.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                      'Register',
-                      style: GoogleFonts.nunito(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
+                        : CustomText.labelText(text: "Register")),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()));
                   },
-                  child: Text(
-                    'Already have an account? Login',
-                    style: GoogleFonts.nunito(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF2E8BFF),
-                    ),
-                  ),
+                  child: CustomText.paragraph(text: 'Already have an account? Login', color: AppColors.primaryColor)
                 ),
               ],
             ),
