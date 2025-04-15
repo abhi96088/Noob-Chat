@@ -2,10 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:noob_chat/widget/custom_texts.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
+  ///______________________ Function to handle logout ____________________________///
   Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacementNamed(context, '/login');
@@ -13,11 +14,11 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
-      appBar: AppBar(
+         appBar: AppBar(
         backgroundColor: const Color(0xFF2E8BFF),
         title: Text(
           'Noob Chat',
@@ -47,10 +48,7 @@ class HomeScreen extends StatelessWidget {
 
           if (users.isEmpty) {
             return Center(
-              child: Text(
-                'No users found 😢',
-                style: GoogleFonts.nunito(fontSize: 16),
-              ),
+              child: CustomText.labelText(text: "No users found!")
             );
           }
 
