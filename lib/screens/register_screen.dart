@@ -20,12 +20,14 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   // controllers to handle text inside text fields
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmController = TextEditingController();
 
   ///______________________ Function to handle user registration ____________________________///
   void handleRegister(FlagProvider provider) async {
     final email = emailController.text.trim();
+    final name = nameController.text.trim();
     final password = passwordController.text.trim();
     final confirm = confirmController.text.trim();
 
@@ -37,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     provider.toggleLoading();
 
-    final user = await AuthService().register(email, password);
+    final user = await AuthService().register(email, password, name);
 
     provider.toggleLoading();
 
@@ -68,6 +70,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: emailController,
                   labelText: "Email",
                   icon: Icon(Icons.email),
+                ),
+                const SizedBox(height: 20),
+                CustomTextField(
+                  controller: nameController,
+                  labelText: "Name",
+                  icon: Icon(Icons.person),
                 ),
                 const SizedBox(height: 20),
                 CustomTextField(

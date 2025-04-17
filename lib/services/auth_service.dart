@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:noob_chat/services/database_services.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -19,7 +20,7 @@ class AuthService {
   }
 
   ///___________________ Function to handle user registration ______________________///
-  Future<User?> register(String email, String password) async {
+  Future<User?> register(String email, String password, String name) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -28,10 +29,13 @@ class AuthService {
 
       final user = userCredential.user;
       if (user != null) {
-        await _firestore.collection('users').doc(user.uid).set({
+        // create and store user details on database
+        DatabaseServices().createUserProfile({
           'uid': user.uid,
-          'email': user.email,
-          'createdAt': FieldValue.serverTimestamp(),
+          'name' : name,
+          'email' : user.email ?? '',
+          'photoUrl' : user.photoURL ?? '',
+          'createdAt' : FieldValue.serverTimestamp()
         });
       }
 
@@ -58,16 +62,14 @@ class AuthService {
       final user = userCredential.user;
 
       if (user != null) {
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
-        if (!userDoc.exists) {
-          await _firestore.collection('users').doc(user.uid).set({
+        // create and store user details on database
+          DatabaseServices().createUserProfile({
             'uid': user.uid,
-            'email': user.email,
-            'name': user.displayName ?? '',
-            'photoUrl': user.photoURL ?? '',
-            'createdAt': FieldValue.serverTimestamp(),
+            'name' : user.displayName ?? '',
+            'email' : user.email ?? '',
+            'photoUrl' : user.photoURL ?? '',
+            'createdAt' : FieldValue.serverTimestamp()
           });
-        }
       }
 
       return user;
