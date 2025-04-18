@@ -2,103 +2,88 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:noob_chat/widget/custom_texts.dart';
+import 'package:noob_chat/services/auth_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-  ///______________________ Function to handle logout ____________________________///
-  Future<void> _logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/login');
-  }
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+
+  final currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
-
-    final currentUser = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
-         appBar: AppBar(
-        backgroundColor: const Color(0xFF2E8BFF),
-        title: Text(
-          'Noob Chat',
-          style: GoogleFonts.montserrat(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+      appBar: AppBar(title: Text(
+        'Noob Chat',
+        style: GoogleFonts.montserrat(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
         ),
-        actions: [
-          IconButton(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'Logout',
-          )
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+      ),),
+      body: StreamBuilder(stream: FirebaseFirestore.instance.collectionGroup('messages').where('senderId', isEqualTo: currentUser).orderBy('timestamp', descending: true).snapshots(), builder: (context, snapshot){
+        if(!snapshot.hasData)return Center(child: CircularProgressIndicator(),);
+
+        final messages = snapshot.data!.docs;
+
+        Map<String, Map<String, dynamic>> recentChats = {};
+
+        for(var msg in messages){
+          final recieverId = msg['recieverId'];
+          final chatId = _getChatId(currentUser!.uid, recieverId);
+
+          if(!recentChats.containsKey(chatId)){
+            recentChats[chatId] = {
+              'lastMessage': msg['text'],
+              'timestamp': msg['timestamp'],
+              'uid': recieverId
+            };
           }
+        }
 
-          final users = snapshot.data!.docs
-              .where((doc) => doc['uid'] != currentUser!.uid)
-              .toList();
+        final chatList = recentChats.values.toList();
 
-          if (users.isEmpty) {
-            return Center(
-              child: CustomText.labelText(text: "No users found!")
-            );
-          }
+        return ListView.builder(
+            itemCount: chatList.length,
+            itemBuilder: (context, index){
+              final chat = chatList[index];
+              
+              return FutureBuilder<DocumentSnapshot>(future: FirebaseFirestore.instance.collection('users').doc(chat['uid']).get(), builder: (context, userSnap){
+                if(!userSnap.hasData) return SizedBox();
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              final user = users[index];
-              final userData = user.data() as Map<String, dynamic>;
+                final user = userSnap.data!;
 
-              final photoUrl = userData.containsKey('photoUrl')
-                  ? userData['photoUrl'] as String
-                  : '';
-
-              return Card(
-                elevation: 1,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
+                return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage:
-                    photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                    child: photoUrl.isEmpty
-                        ? const Icon(Icons.person)
-                        : null,
+                    backgroundImage: user['photoUrl'].isNotEmpty ? NetworkImage(user['photoUrl']) : null,
+                    child: user['photoUrl'].isEmpty ? const Icon(Icons.person) : null,
                   ),
-                  title: Text(
-                    userData['name'] ?? userData['email'],
-                    style: GoogleFonts.nunito(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle:
-                  Text(userData['email'], style: GoogleFonts.nunito()),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/chat',
-                      arguments: {
-                        'uid': userData['uid'],
-                        'name': userData['name'],
-                        'email': userData['email'],
-                        'photoUrl': photoUrl,
-                      },
-                    );
+                  title: Text(user['name']),
+                  trailing: Text(chat['timestamp'] != null ? _formatTimestamp(chat['timestamp'].toDate()) : '', style: TextStyle(fontSize: 12),),
+                  onTap: (){
+                    Navigator.pushNamed(context, '/chat', arguments: {
+                      'uid': user.id,
+                      'name': user['name'],
+                      'photoUrl': user['photoUrl'] ?? ''
+                    });
                   },
-                ),
-              );
-            },
-          );
-        },
-      ),
+                );
+              });
+            });
+      }),
     );
   }
+
+  String _getChatId(String uid1, String uid2) {
+    return uid1.hashCode <= uid2.hashCode ? '${uid1}_$uid2' : '${uid2}_$uid1';
+  }
+
+  String _formatTimestamp(DateTime time) {
+    return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:noob_chat/services/database_services.dart';
 import 'package:noob_chat/utils/app_colors.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -46,15 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (text.isEmpty) return;   // do nothing if empty
 
     // store in database where chat id matches
-    FirebaseFirestore.instance
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .add({
-      'senderId': currentUser!.uid,
-      'text': text,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+    DatabaseServices().addChatMessage(senderId: currentUser!.uid, text: text, chatId: chatId);
 
     _messageController.clear();   // clear text field
   }

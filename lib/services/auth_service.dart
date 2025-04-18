@@ -7,11 +7,11 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   ///___________________ Function to handle signIn ______________________///
   Future<User?> signIn(String email, String password) async {
     try {
-      final result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
       return result.user;
     } catch (e) {
       print('Sign in error: $e');
@@ -32,10 +32,10 @@ class AuthService {
         // create and store user details on database
         DatabaseServices().createUserProfile({
           'uid': user.uid,
-          'name' : name,
-          'email' : user.email ?? '',
-          'photoUrl' : user.photoURL ?? '',
-          'createdAt' : FieldValue.serverTimestamp()
+          'name': name,
+          'email': user.email ?? '',
+          'photoUrl': user.photoURL ?? '',
+          'createdAt': FieldValue.serverTimestamp()
         });
       }
 
@@ -52,7 +52,8 @@ class AuthService {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -63,13 +64,13 @@ class AuthService {
 
       if (user != null) {
         // create and store user details on database
-          DatabaseServices().createUserProfile({
-            'uid': user.uid,
-            'name' : user.displayName ?? '',
-            'email' : user.email ?? '',
-            'photoUrl' : user.photoURL ?? '',
-            'createdAt' : FieldValue.serverTimestamp()
-          });
+        DatabaseServices().createUserProfile({
+          'uid': user.uid,
+          'name': user.displayName ?? '',
+          'email': user.email ?? '',
+          'photoUrl': user.photoURL ?? '',
+          'createdAt': FieldValue.serverTimestamp()
+        });
       }
 
       return user;

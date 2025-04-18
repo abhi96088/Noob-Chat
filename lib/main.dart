@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:noob_chat/providers/flag_provider.dart';
 import 'package:noob_chat/screens/chat_screen.dart';
-import 'package:noob_chat/screens/home_screen.dart';
+import 'package:noob_chat/screens/search_screen.dart';
 import 'package:noob_chat/screens/login_screen.dart';
 import 'package:noob_chat/screens/register_screen.dart';
 import 'package:noob_chat/screens/splash_screen.dart';
@@ -33,12 +33,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryColor),
         useMaterial3: true,
       ),
-      initialRoute: '/home',
+      initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const SearchScreen(),
+        '/search': (context) => const SearchScreen(),
         '/chat': (context) => const ChatScreen(), // will build this next
       },
       home: const LoginScreen(),
