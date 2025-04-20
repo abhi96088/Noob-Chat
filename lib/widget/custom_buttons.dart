@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class CustomButtons{
 
-  static SizedBox primaryButton({required Widget child, required VoidCallback onPressed}){
+  SizedBox primaryButton({required Widget child, required VoidCallback onPressed}){
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: (){onPressed;},
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2E8BFF),
           padding: const EdgeInsets.symmetric(vertical: 14),

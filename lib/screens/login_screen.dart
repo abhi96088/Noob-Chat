@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:noob_chat/providers/flag_provider.dart';
 import 'package:noob_chat/screens/register_screen.dart';
 import 'package:noob_chat/utils/app_colors.dart';
@@ -84,11 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   isPassword: true,
                 ),
                 const SizedBox(height: 30),
-                CustomButtons.primaryButton(
-                    child: provider.isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : CustomText.labelText(text: "Login"),
-                    onPressed: () => handleLogin(provider)),
+                CustomButtons().primaryButton(child: provider.isLoading
+                ? const CircularProgressIndicator(color: Colors.white)
+                  : CustomText.labelText(text: "Login"), onPressed: (){
+                  handleLogin(provider);
+                },),
                 const SizedBox(height: 16),
                 CustomText.paragraph(text: "Or"),
                 const SizedBox(height: 16),

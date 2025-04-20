@@ -91,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   icon: Icon(Icons.lock_outline),
                 ),
                 const SizedBox(height: 30),
-                CustomButtons.primaryButton(
+                CustomButtons().primaryButton(
                     onPressed: () => handleRegister(provider),
                     child: provider.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
