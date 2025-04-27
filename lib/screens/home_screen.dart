@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:noob_chat/services/auth_service.dart';
+import 'package:noob_chat/widget/custom_texts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),),
       body: StreamBuilder(stream: FirebaseFirestore.instance.collectionGroup('messages').where('senderId', isEqualTo: currentUser).orderBy('timestamp', descending: true).snapshots(), builder: (context, snapshot){
-        if(!snapshot.hasData)return Center(child: CircularProgressIndicator(),);
+        if(!snapshot.hasData)return Center(child: CustomText.labelText(text: "No Chats Found!", color: Colors.grey),);
 
         final messages = snapshot.data!.docs;
 
@@ -75,6 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             });
       }),
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        Navigator.pushNamed(context, '/search');
+      }, child: Icon(Icons.message),),
     );
   }
 
