@@ -4,8 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:noob_chat/widget/custom_texts.dart';
 
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
+class SearchScreen extends StatefulWidget {
+  SearchScreen({super.key});
+
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  String searchQuery = '';
+
   ///______________________ Function to handle logout ____________________________///
   Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
@@ -35,69 +43,93 @@ class SearchScreen extends StatelessWidget {
           )
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Column(
+        children: [
+          Padding(padding: EdgeInsets.all(12),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: "Search by name...",
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onChanged: (val){
+              setState((){
+                searchQuery = val.toLowerCase();
+              });
+            },
+          ),),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('users').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          final users = snapshot.data!.docs
-              .where((doc) => doc['uid'] != currentUser!.uid)
-              .toList();
+                final users = snapshot.data!.docs
+                    .where((doc) => doc['uid'] != currentUser!.uid)
+                    .toList();
 
-          if (users.isEmpty) {
-            return Center(
-              child: CustomText.labelText(text: "No users found!")
-            );
-          }
+                final filteredUsers = users.where((doc){
+                  final name = doc['name'].toString().toLowerCase();
+                  return searchQuery.isEmpty || name.contains(searchQuery);
+                }).toList();
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              final user = users[index];
-              final userData = user.data() as Map<String, dynamic>;
+                if (filteredUsers.isEmpty) {
+                  return Center(
+                      child: CustomText.labelText(text: "No users found!")
+                  );
+                }
 
-              final photoUrl = userData.containsKey('photoUrl')
-                  ? userData['photoUrl'] as String
-                  : '';
+                return ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: filteredUsers.length,
+                  itemBuilder: (context, index) {
+                    final user = filteredUsers[index];
+                    final userData = user.data() as Map<String, dynamic>;
 
-              return Card(
-                elevation: 1,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage:
-                    photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                    child: photoUrl.isEmpty
-                        ? const Icon(Icons.person)
-                        : null,
-                  ),
-                  title: Text(
-                    userData['name'] ?? userData['email'],
-                    style: GoogleFonts.nunito(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle:
-                  Text(userData['email'], style: GoogleFonts.nunito()),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/chat',
-                      arguments: {
-                        'uid': userData['uid'],
-                        'name': userData['name'],
-                        'email': userData['email'],
-                        'photoUrl': photoUrl,
-                      },
+                    final photoUrl = userData.containsKey('photoUrl')
+                        ? userData['photoUrl'] as String
+                        : '';
+
+                    return Card(
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage:
+                          photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+                          child: photoUrl.isEmpty
+                              ? const Icon(Icons.person)
+                              : null,
+                        ),
+                        title: Text(
+                          userData['name'] ?? userData['email'],
+                          style: GoogleFonts.nunito(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle:
+                        Text(userData['email'], style: GoogleFonts.nunito()),
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/chat',
+                            arguments: {
+                              'uid': userData['uid'],
+                              'name': userData['name'],
+                              'email': userData['email'],
+                              'photoUrl': photoUrl,
+                            },
+                          );
+                        },
+                      ),
                     );
                   },
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

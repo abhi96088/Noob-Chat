@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:noob_chat/services/auth_service.dart';
+import 'package:noob_chat/utils/app_colors.dart';
 import 'package:noob_chat/widget/custom_texts.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,10 +23,11 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(title: Text(
         'Noob Chat',
         style: GoogleFonts.montserrat(
-          color: Colors.white,
+          color: AppColors.primaryColor,
           fontWeight: FontWeight.w600,
         ),
-      ),),
+      ),
+      centerTitle: true,),
       body: StreamBuilder(stream: FirebaseFirestore.instance.collectionGroup('messages').where('senderId', isEqualTo: currentUser).orderBy('timestamp', descending: true).snapshots(), builder: (context, snapshot){
         if(!snapshot.hasData)return Center(child: CustomText.labelText(text: "No Chats Found!", color: Colors.grey),);
 
