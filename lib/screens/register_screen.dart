@@ -53,7 +53,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final provider = context.watch<FlagProvider>();
+
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: SafeArea(
@@ -62,47 +66,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
+                SizedBox(
+                    height: screenHeight * 0.15,
+                    width: screenWidth,
+                    child: Image.asset("assets/images/banner.PNG")),
                 CustomText.titleText(
                   text: 'Create Account',
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: screenHeight * 0.04),
                 CustomTextField(
                   controller: emailController,
                   labelText: "Email",
                   icon: Icon(Icons.email),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: screenHeight * 0.02),
                 CustomTextField(
                   controller: nameController,
                   labelText: "Name",
                   icon: Icon(Icons.person),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: screenHeight * 0.02),
                 CustomTextField(
                   controller: passwordController,
                   labelText: "Password",
                   icon: Icon(Icons.lock),
                   isPassword: true,
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: screenHeight * 0.02),
                 CustomTextField(
                   controller: confirmController,
                   labelText: "Confirm Password",
                   icon: Icon(Icons.lock_outline),
                 ),
-                const SizedBox(height: 30),
+                SizedBox(height: screenHeight * 0.03),
                 CustomButtons().primaryButton(
                     onPressed: () => handleRegister(provider),
                     child: provider.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : CustomText.labelText(text: "Register")),
-                const SizedBox(height: 16),
+                SizedBox(height: screenHeight * 0.016),
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => LoginScreen()));
                   },
-                  child: CustomText.paragraph(text: 'Already have an account? Login', color: AppColors.primaryColor)
+                    child: RichText(text: TextSpan(
+                        text: "Already have an account? ",
+                        style: GoogleFonts.nunito(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color:Colors.black,
+                        ),
+                        children: [
+                          TextSpan(text: "Login",
+                            style: GoogleFonts.nunito(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primaryColor,
+                            ),)
+                        ]
+                    ),)
                 ),
               ],
             ),

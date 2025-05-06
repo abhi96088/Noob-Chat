@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:noob_chat/providers/flag_provider.dart';
 import 'package:noob_chat/screens/register_screen.dart';
 import 'package:noob_chat/utils/app_colors.dart';
@@ -58,7 +59,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final provider = context.watch<FlagProvider>();
+
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: SafeArea(
@@ -68,29 +73,33 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SizedBox(
+                    height: screenHeight * 0.15,
+                    width: screenWidth,
+                    child: Image.asset("assets/images/banner.PNG")),
                 CustomText.titleText(text: "Login"),
-                const SizedBox(height: 40),
+                SizedBox(height: screenHeight * 0.04),
                 CustomTextField(
                   controller: emailController,
                   labelText: "Email",
                   icon: Icon(Icons.email),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: screenHeight * 0.02),
                 CustomTextField(
                   controller: passwordController,
                   labelText: "Password",
                   icon: Icon(Icons.lock),
                   isPassword: true,
                 ),
-                const SizedBox(height: 30),
+                SizedBox(height: screenHeight * 0.03),
                 CustomButtons().primaryButton(child: provider.isLoading
                 ? const CircularProgressIndicator(color: Colors.white)
                   : CustomText.labelText(text: "Login"), onPressed: (){
                   handleLogin(provider);
                 },),
-                const SizedBox(height: 16),
+                SizedBox(height: screenHeight * 0.016),
                 CustomText.paragraph(text: "Or"),
-                const SizedBox(height: 16),
+                SizedBox(height: screenHeight * 0.016),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -107,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: screenHeight * 0.016),
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(
@@ -115,7 +124,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         MaterialPageRoute(
                             builder: (context) => RegisterScreen()));
                   },
-                  child: CustomText.paragraph(text: "Don't have an account? Register Now", color: AppColors.primaryColor)
+                  child: RichText(text: TextSpan(
+                    text: "Don't have an account? ",
+                    style: GoogleFonts.nunito(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color:Colors.black,
+                    ),
+                    children: [
+                      TextSpan(text: "Register Now",
+                      style: GoogleFonts.nunito(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryColor,
+                      ),)
+                    ]
+                  ),)
                 ),
               ],
             ),
