@@ -4,9 +4,11 @@ class FlagProvider extends ChangeNotifier{
 
   bool _isLoading = false;
   bool _isVisible = false;
+  String _searchQuery = "";
 
   bool get isLoading => _isLoading;
   bool get isVisible => _isVisible;
+  String get searchQuery => _searchQuery;
 
   void toggleLoading(){
     _isLoading = !_isLoading;
@@ -18,5 +20,9 @@ class FlagProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  void updateSearchQuery(String newText){
+    _searchQuery = newText.toLowerCase();
+    notifyListeners();
+  }
 
 }

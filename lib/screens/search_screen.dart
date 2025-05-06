@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:noob_chat/providers/flag_provider.dart';
 import 'package:noob_chat/widget/custom_texts.dart';
+import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
   SearchScreen({super.key});
@@ -12,13 +14,9 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  String searchQuery = '';
 
-  ///______________________ Function to handle logout ____________________________///
-  Future<void> _logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/login');
-  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +33,6 @@ class _SearchScreenState extends State<SearchScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'Logout',
-          )
-        ],
       ),
       body: Column(
         children: [
@@ -53,9 +44,7 @@ class _SearchScreenState extends State<SearchScreen> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onChanged: (val){
-              setState((){
-                searchQuery = val.toLowerCase();
-              });
+              Provider.of<FlagProvider>(context, listen: false).updateSearchQuery(val);
             },
           ),),
           Expanded(
@@ -69,6 +58,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 final users = snapshot.data!.docs
                     .where((doc) => doc['uid'] != currentUser!.uid)
                     .toList();
+
+                final searchQuery = Provider.of<FlagProvider>(context).searchQuery;
 
                 final filteredUsers = users.where((doc){
                   final name = doc['name'].toString().toLowerCase();

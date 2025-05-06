@@ -28,4 +28,15 @@ class DatabaseServices{
       'timestamp': FieldValue.serverTimestamp()
     });
   }
+
+  ///___________________ Function to fetch an user details from database ______________________///
+  Future<Map<String, dynamic>?> getUserData(String uid) async{
+    final DocumentSnapshot snapshot = await _fireStore.collection('users').doc(uid).get();
+
+    if(snapshot.exists){
+      return snapshot.data() as Map<String, dynamic>;
+    }else{
+      return null;
+    }
+  }
 }

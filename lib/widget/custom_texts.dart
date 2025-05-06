@@ -15,11 +15,11 @@ class CustomText{
     );
   }
 
-  static Text labelText ({required String text, Color? color}){
+  static Text labelText ({required String text, Color? color, double? fontSize}){
     return Text(
         text,
         style: GoogleFonts.nunito(
-        fontSize: 18,
+        fontSize: fontSize ?? 18,
         fontWeight: FontWeight.w600,
         color: color ?? Colors.white,
         )
