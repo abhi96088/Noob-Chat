@@ -25,8 +25,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   ///______________________ Function to fetch user data ____________________________///
   void getData() async {
-    userData = await DatabaseServices()
-        .getUserData(FirebaseAuth.instance.currentUser!.uid);
+    final fetchData = await DatabaseServices()
+        .getUserData(user!.uid);
+    setState(() {
+      userData = fetchData;
+    });
   }
 
   ///______________________ Function to handle logout ____________________________///

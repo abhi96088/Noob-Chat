@@ -23,11 +23,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(title: Text(
         'Noob Chat',
         style: GoogleFonts.montserrat(
-          color: AppColors.primaryColor,
+          color: Colors.white,
           fontWeight: FontWeight.w600,
         ),
       ),
-      centerTitle: true,),
+      centerTitle: true,
+      actions: [
+        IconButton(onPressed: (){
+          Navigator.pushNamed(context, '/profile');
+        }, icon: Icon(Icons.person, color: Colors.white,))
+      ],
+        backgroundColor: AppColors.primaryColor,
+      ),
       body: StreamBuilder(stream: FirebaseFirestore.instance.collectionGroup('messages').where('senderId', isEqualTo: currentUser).orderBy('timestamp', descending: true).snapshots(), builder: (context, snapshot){
         if(!snapshot.hasData)return Center(child: CustomText.labelText(text: "No Chats Found!", color: Colors.grey),);
 
