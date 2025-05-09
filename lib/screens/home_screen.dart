@@ -35,56 +35,68 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
         backgroundColor: AppColors.primaryColor,
       ),
-      body: StreamBuilder(stream: FirebaseFirestore.instance.collectionGroup('messages').where('senderId', isEqualTo: currentUser).orderBy('timestamp', descending: true).snapshots(), builder: (context, snapshot){
-        if(!snapshot.hasData)return Center(child: CustomText.labelText(text: "No Chats Found!", color: Colors.grey),);
+      body: Column(
+        children: [
+          Padding(padding: EdgeInsets.all(12),
+          child: ListTile(
+            leading: CircleAvatar(backgroundImage: AssetImage("assets/images/chatbot.png"),),
+            title: CustomText.labelText(text: "Noob AI"),
+          ),
+            ),
+          Expanded(
+            child: StreamBuilder(stream: FirebaseFirestore.instance.collectionGroup('messages').where('senderId', isEqualTo: currentUser).orderBy('timestamp', descending: true).snapshots(), builder: (context, snapshot){
+              if(!snapshot.hasData)return Center(child: CustomText.labelText(text: "No Chats Found!", color: Colors.grey),);
 
-        final messages = snapshot.data!.docs;
+              final messages = snapshot.data!.docs;
 
-        Map<String, Map<String, dynamic>> recentChats = {};
+              Map<String, Map<String, dynamic>> recentChats = {};
 
-        for(var msg in messages){
-          final recieverId = msg['recieverId'];
-          final chatId = _getChatId(currentUser!.uid, recieverId);
+              for(var msg in messages){
+                final recieverId = msg['recieverId'];
+                final chatId = _getChatId(currentUser!.uid, recieverId);
 
-          if(!recentChats.containsKey(chatId)){
-            recentChats[chatId] = {
-              'lastMessage': msg['text'],
-              'timestamp': msg['timestamp'],
-              'uid': recieverId
-            };
-          }
-        }
+                if(!recentChats.containsKey(chatId)){
+                  recentChats[chatId] = {
+                    'lastMessage': msg['text'],
+                    'timestamp': msg['timestamp'],
+                    'uid': recieverId
+                  };
+                }
+              }
 
-        final chatList = recentChats.values.toList();
+              final chatList = recentChats.values.toList();
 
-        return ListView.builder(
-            itemCount: chatList.length,
-            itemBuilder: (context, index){
-              final chat = chatList[index];
-              
-              return FutureBuilder<DocumentSnapshot>(future: FirebaseFirestore.instance.collection('users').doc(chat['uid']).get(), builder: (context, userSnap){
-                if(!userSnap.hasData) return SizedBox();
+              return ListView.builder(
+                  itemCount: chatList.length,
+                  itemBuilder: (context, index){
+                    final chat = chatList[index];
 
-                final user = userSnap.data!;
+                    return FutureBuilder<DocumentSnapshot>(future: FirebaseFirestore.instance.collection('users').doc(chat['uid']).get(), builder: (context, userSnap){
+                      if(!userSnap.hasData) return SizedBox();
 
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: user['photoUrl'].isNotEmpty ? NetworkImage(user['photoUrl']) : null,
-                    child: user['photoUrl'].isEmpty ? const Icon(Icons.person) : null,
-                  ),
-                  title: Text(user['name']),
-                  trailing: Text(chat['timestamp'] != null ? _formatTimestamp(chat['timestamp'].toDate()) : '', style: TextStyle(fontSize: 12),),
-                  onTap: (){
-                    Navigator.pushNamed(context, '/chat', arguments: {
-                      'uid': user.id,
-                      'name': user['name'],
-                      'photoUrl': user['photoUrl'] ?? ''
+                      final user = userSnap.data!;
+
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: user['photoUrl'].isNotEmpty ? NetworkImage(user['photoUrl']) : null,
+                          child: user['photoUrl'].isEmpty ? const Icon(Icons.person) : null,
+                        ),
+                        title: Text(user['name']),
+                        trailing: Text(chat['timestamp'] != null ? _formatTimestamp(chat['timestamp'].toDate()) : '', style: TextStyle(fontSize: 12),),
+                        onTap: (){
+                          Navigator.pushNamed(context, '/chat', arguments: {
+                            'uid': user.id,
+                            'name': user['name'],
+                            'photoUrl': user['photoUrl'] ?? ''
+                          });
+                        },
+                      );
                     });
-                  },
-                );
-              });
-            });
-      }),
+                  });
+            }),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(onPressed: (){
         Navigator.pushNamed(context, '/search');
       }, child: Icon(Icons.message),),

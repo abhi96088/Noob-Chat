@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class DatabaseServices{
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   ///___________________ Function to add user details to database ______________________///
   Future<void> createUserProfile(Map<String, dynamic> user) async {
@@ -39,4 +43,24 @@ class DatabaseServices{
       return null;
     }
   }
+
+  ///___________________ Function to upload image to the database ______________________///
+  Future<String?> uploadImage(File imageFile, String uid) async{
+    final ref = _storage.ref().child('profile_pictures').child('$uid.jpg');
+    
+    await ref.putFile(imageFile);
+    final imageUrl = await ref.getDownloadURL();
+
+    if(imageUrl.isNotEmpty){
+      return imageUrl;
+    }
+
+    return null;
+  }
+
+  ///___________________ Function to update image URL ______________________///
+  void updatePhotoUrl(String uid, String imageUrl) async{
+    await _fireStore.collection('users').doc(uid).update({'photoUrl' : imageUrl});
+  }
+
 }

@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:noob_chat/services/database_services.dart';
 import 'package:noob_chat/utils/app_colors.dart';
 import 'package:noob_chat/widget/custom_texts.dart';
@@ -38,6 +41,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.pushReplacementNamed(context, '/login');
   }
 
+  ///______________________ Function to upload profile picture ____________________________///
+  Future<void> _pickAndUploadImage() async{
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
+    if(pickedImage!= null){
+      File imageFile = File(pickedImage.path);
+      
+      final getImageUrl = await DatabaseServices().uploadImage(imageFile, user!.uid);
+      DatabaseServices().updatePhotoUrl(user!.uid, getImageUrl!);
+
+      getData();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -58,16 +77,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     children: [
                       SizedBox(height: screenHeight * 0.02),
-                      CircleAvatar(
-                        radius: screenHeight * 0.1,
-                        backgroundImage:
-                            NetworkImage(userData?['photoUrl'] ?? ''),
-                        child: userData?['photoUrl'] == ''
-                            ? Icon(
-                                Icons.person,
-                                size: screenHeight * 0.1,
-                              )
-                            : null,
+                      GestureDetector(
+                        onTap: _pickAndUploadImage,
+                        child: CircleAvatar(
+                          radius: screenHeight * 0.1,
+                          backgroundImage:
+                              NetworkImage(userData?['photoUrl'] ?? ''),
+                          child: userData?['photoUrl'] == ''
+                              ? Icon(
+                                  Icons.person,
+                                  size: screenHeight * 0.1,
+                                )
+                              : null,
+                        ),
                       ),
                       SizedBox(
                         height: screenHeight * 0.02,
