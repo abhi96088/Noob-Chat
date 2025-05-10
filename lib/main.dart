@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:noob_chat/providers/flag_provider.dart';
 import 'package:noob_chat/screens/chat_screen.dart';
+import 'package:noob_chat/screens/chatbot_screen.dart';
 import 'package:noob_chat/screens/home_screen.dart';
 import 'package:noob_chat/screens/profile_screen.dart';
 import 'package:noob_chat/screens/search_screen.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/search': (context) => SearchScreen(),
         '/chat': (context) => const ChatScreen(),
+        '/chatBot': (context) => const ChatBotScreen(),
         '/profile': (context) => const ProfileScreen(),
       },
     );

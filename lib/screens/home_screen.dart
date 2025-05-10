@@ -38,9 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           Padding(padding: EdgeInsets.all(12),
-          child: ListTile(
-            leading: CircleAvatar(backgroundImage: AssetImage("assets/images/chatbot.png"),),
-            title: CustomText.labelText(text: "Noob AI"),
+          child: GestureDetector(
+            onTap: (){
+              Navigator.pushNamed(context, '/chatBot');
+            },
+            child: ListTile(
+              leading: CircleAvatar(backgroundImage: AssetImage("assets/images/chatbot.png"),),
+              title: CustomText.labelText(text: "Noob AI", color: Colors.black),
+            ),
           ),
             ),
           Expanded(
