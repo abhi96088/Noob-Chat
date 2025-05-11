@@ -25,12 +25,29 @@ class DatabaseServices{
   }
 
   ///___________________ Function to add a single chat to database ______________________///
-  Future<void> addChatMessage({required String senderId, required String text, required String chatId}) async{
+  Future<void> addChatMessage({required String senderId, required String receiverId, required String text, required String chatId}) async{
     await _fireStore.collection('chats').doc(chatId).collection('messages').add({
       'senderId': senderId,
+      'receiverId': receiverId,
       'text': text,
       'timestamp': FieldValue.serverTimestamp()
     });
+  }
+
+  ///______________________ Function to update recent message ____________________________///
+  Future<void> updateRecentMessage({required String chatId,
+    required String currentUserId,
+    required String otherUserId,
+    required String message,
+  })async {
+    final messageRef  = _fireStore.collection('recentChats').doc(currentUserId).collection('chats').doc(otherUserId);
+
+    await messageRef.set({
+      'chatId': chatId,
+      'uid': otherUserId,
+      'lastMessage': message,
+      'timeStamp': FieldValue.serverTimestamp()
+    }, SetOptions(merge: true));
   }
 
   ///___________________ Function to fetch an user details from database ______________________///

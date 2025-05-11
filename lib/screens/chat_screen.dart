@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:noob_chat/services/database_services.dart';
 import 'package:noob_chat/utils/app_colors.dart';
 
@@ -13,7 +14,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final currentUser = FirebaseAuth.instance.currentUser;
+  final cUid = FirebaseAuth.instance.currentUser!.uid;
 
   late String receiverId;
   late String chatId;
@@ -32,7 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
     receiverId = args['uid'] as String? ?? '';
     receiverName = args['name'] as String? ?? 'Unknown';
     receiverPhoto = args['photoUrl'] as String? ?? '';
-    chatId = _getChatId(currentUser!.uid, receiverId);
+    chatId = _getChatId(cUid, receiverId);
   }
 
   ///______________________ Function to generate chat id ____________________________///
@@ -42,12 +43,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   ///______________________ Function to handle send message ____________________________///
   void _sendMessage() {
+    final dbService = DatabaseServices();
     // get text from text field
     final text = _messageController.text.trim();
     if (text.isEmpty) return;   // do nothing if empty
 
     // store in database where chat id matches
-    DatabaseServices().addChatMessage(senderId: currentUser!.uid, text: text, chatId: chatId);
+    dbService.addChatMessage(senderId: cUid, text: text, chatId: chatId, receiverId: receiverId);
+
+    // update recent message for sender
+    dbService.updateRecentMessage(chatId: chatId, currentUserId: cUid, otherUserId: receiverId, message: text);
+
+    // update recent message for receiver
+    dbService.updateRecentMessage(chatId: chatId, currentUserId: receiverId, otherUserId: cUid, message: text);
 
     _messageController.clear();   // clear text field
   }
@@ -94,30 +102,43 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (context, index) {
 
                     final msg = messages[index];    // store single message
-                    final isMe = msg['senderId'] == currentUser!.uid; // check if sender id matches to current user
+                    final isMe = msg['senderId'] == cUid; // check if sender id matches to current user
 
                     return Align(
-                      alignment: isMe
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,   // align right if message is send and left if message is received
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isMe
-                              ? AppColors.primaryColor
-                              : Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          msg['text'] ?? '',
-                          style: const TextStyle(fontSize: 16),
-                        ),
+                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Column(
+                        crossAxisAlignment:
+                        isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isMe ? AppColors.primaryColor : Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              msg['text'] ?? '',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                          // Timestamp below the message
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              msg['timestamp'] != null
+                                  ? DateFormat('hh:mm a').format(msg['timestamp'].toDate())
+                                  : '',
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ),
+                        ],
                       ),
                     );
+
                   },
                 );
               },
