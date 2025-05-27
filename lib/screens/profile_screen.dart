@@ -17,6 +17,10 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+
   final user = FirebaseAuth.instance.currentUser;
   Map<String, dynamic>? userData;
 
@@ -32,6 +36,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .getUserData(user!.uid);
     setState(() {
       userData = fetchData;
+      nameController.text = userData?['name'] ?? "";
+      emailController.text = userData?['email'] ?? "";
     });
   }
 
@@ -71,67 +77,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? Center(
                 child: Text("No User Found"),
               )
-            : Padding(
-                padding: EdgeInsets.all(20),
-                child: Center(
-                  child: Column(
-                    children: [
-                      SizedBox(height: screenHeight * 0.02),
-                      GestureDetector(
-                        onTap: _pickAndUploadImage,
-                        child: CircleAvatar(
-                          radius: screenHeight * 0.1,
-                          backgroundImage:
-                              NetworkImage(userData?['photoUrl'] ?? ''),
-                          child: userData?['photoUrl'] == ''
-                              ? Icon(
-                                  Icons.person,
-                                  size: screenHeight * 0.1,
-                                )
-                              : null,
+            : SingleChildScrollView(
+              child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        SizedBox(height: screenHeight * 0.02),
+                        GestureDetector(
+                          onTap: _pickAndUploadImage,
+                          child: CircleAvatar(
+                            radius: screenHeight * 0.1,
+                            backgroundImage:
+                                NetworkImage(userData?['photoUrl'] ?? ''),
+                            child: userData?['photoUrl'] == ''
+                                ? Icon(
+                                    Icons.person,
+                                    size: screenHeight * 0.1,
+                                  )
+                                : null,
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: screenHeight * 0.02,
-                      ),
-                      CustomText.labelText(
-                          text: userData?['name'] ?? 'No Name',
-                          color: Colors.black,
-                          fontSize: 28),
-                      SizedBox(
-                        height: screenHeight * 0.01,
-                      ),
-                      CustomText.paragraph(text: userData?['email'] ?? ''),
-                      SizedBox(
-                        height: screenHeight * 0.03,
-                      ),
-                      ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.edit),
-                          label: Text("Edit Profile")),
-                      SizedBox(
-                        height: screenHeight * 0.3,
-                      ),
-                      SizedBox(
-                        height: screenHeight * 0.05,
-                        width: screenWidth * 0.4,
-                        child: ElevatedButton.icon(
-                            onPressed: () => _logout(context),
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              backgroundColor: Colors.red,
-                              iconColor: Colors.white,
-                            ),
-                            icon: Icon(Icons.logout),
-                            label: Text(
-                              "Logout",
-                              style: TextStyle(color: Colors.white),
-                            )),
-                      )
-                    ],
+                        SizedBox(
+                          height: screenHeight * 0.05,
+                        ),
+                        _inputCard(nameController, "Please fill the name", true),
+                        SizedBox(
+                          height: screenHeight * 0.02,
+                        ),
+                        _inputCard(emailController, "Please fill the email", false),
+                        SizedBox(
+                          height: screenHeight * 0.2,
+                        ),
+                        SizedBox(
+                          height: screenHeight * 0.07,
+                          width: screenWidth,
+                          child: ElevatedButton.icon(
+                              onPressed: () => _logout(context),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                backgroundColor: Colors.red.shade400.withAlpha(450),
+                                iconColor: Colors.white,
+                              ),
+                              icon: Icon(Icons.logout, size: 25,),
+                              label: Text(
+                                "Logout",
+                                style: TextStyle(color: Colors.white, fontSize: 22),
+                              )),
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ));
+            ));
   }
+
+  Container _inputCard(TextEditingController controller, String validationMessage, bool isName) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 3)
+          ]
+      ),
+      child: Padding(padding: EdgeInsets.symmetric(horizontal: 12),
+        child: TextFormField(
+          controller: controller,
+          validator: (val) => val != null && val.isNotEmpty ? null : validationMessage,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          onEditingComplete: () {  // Fires only when user stops typing
+            if (controller.text.isNotEmpty) {
+              isName
+                  ? DatabaseServices().updateName(user!.uid, controller.text)
+                  : DatabaseServices().updateEmail(user!.uid, controller.text);
+            }
+          },
+          decoration: InputDecoration(
+              labelText: isName ? "Username" : "Email",
+              border: InputBorder.none,
+              labelStyle: TextStyle(fontSize: 18, color: Colors.black45),
+              prefixIcon: Icon(isName ? Icons.person : Icons.email, color: AppColors.primaryColor,)
+          ),
+        ),),
+    );
+  }
+
 }

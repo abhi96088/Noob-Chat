@@ -80,4 +80,14 @@ class DatabaseServices{
     await _fireStore.collection('users').doc(uid).update({'photoUrl' : imageUrl});
   }
 
+  ///___________________ Function to update name ______________________///
+  void updateName(String uid, String name) async{
+    await _fireStore.collection('users').doc(uid).update({'name' : name});
+  }
+
+  ///___________________ Function to update email ______________________///
+  void updateEmail(String uid, String email) async{
+    await _fireStore.collection('users').doc(uid).update({'email' : email});
+  }
+
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:noob_chat/screens/ChatBotService.dart';
+import 'package:noob_chat/services/ChatBotService.dart';
 
 class ChatBotScreen extends StatefulWidget {
   const ChatBotScreen({super.key});

@@ -43,17 +43,17 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
             child: GestureDetector(
               onTap: () {
                 Navigator.pushNamed(context, '/chatBot');
               },
-              child: ListTile(
+              child:  ListTile(
                 leading: CircleAvatar(
                   backgroundImage: AssetImage("assets/images/chatbot.png"),
                 ),
                 title:
-                    CustomText.labelText(text: "Noob AI", color: Colors.black),
+                CustomText.labelText(text: "Noob AI", color: Colors.black),
               ),
             ),
           ),
@@ -92,27 +92,35 @@ class _HomeScreenState extends State<HomeScreen> {
                         final name = user['name'] ?? 'No Name';
                         final photoUrl = user['photoUrl'] ?? '';
 
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage:
-                            photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                            child: photoUrl.isEmpty ? Icon(Icons.person) : null,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                          child: Column(
+                            children: [
+                              Divider(color: Colors.grey.shade300,),
+                              ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage:
+                                  photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+                                  child: photoUrl.isEmpty ? Icon(Icons.person) : null,
+                                ),
+                                title: Text(name),
+                                subtitle: Text(chat['lastMessage'] ?? ''),
+                                trailing: Text(
+                                  chat['timeStamp'] != null
+                                      ? _formatTimestamp(chat['timeStamp'].toDate())
+                                      : '',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/chat', arguments: {
+                                    'uid': otherUserId,
+                                    'name': name,
+                                    'photoUrl': photoUrl,
+                                  });
+                                },
+                              ),
+                            ],
                           ),
-                          title: Text(name),
-                          subtitle: Text(chat['lastMessage'] ?? ''),
-                          trailing: Text(
-                            chat['timeStamp'] != null
-                                ? _formatTimestamp(chat['timeStamp'].toDate())
-                                : '',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(context, '/chat', arguments: {
-                              'uid': otherUserId,
-                              'name': name,
-                              'photoUrl': photoUrl,
-                            });
-                          },
                         );
                       },
                     );
