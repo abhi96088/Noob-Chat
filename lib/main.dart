@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:noob_chat/providers/flag_provider.dart';
 import 'package:noob_chat/screens/chat_screen.dart';
@@ -9,12 +10,19 @@ import 'package:noob_chat/screens/search_screen.dart';
 import 'package:noob_chat/screens/login_screen.dart';
 import 'package:noob_chat/screens/register_screen.dart';
 import 'package:noob_chat/screens/splash_screen.dart';
+import 'package:noob_chat/services/notification_service.dart';
 import 'package:noob_chat/utils/app_colors.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  NotificationService().init();
+  await messaging.requestPermission();
+
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => FlagProvider())

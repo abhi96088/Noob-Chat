@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class DatabaseServices{
@@ -88,6 +89,14 @@ class DatabaseServices{
   ///___________________ Function to update email ______________________///
   void updateEmail(String uid, String email) async{
     await _fireStore.collection('users').doc(uid).update({'email' : email});
+  }
+
+  ///___________________ Function to save FCM token ______________________///
+  void saveFcmToken(String userId) async{
+    String? token = await FirebaseMessaging.instance.getToken();
+    _fireStore.collection('users').doc(userId).update({
+      'fcmToken': token
+    });
   }
 
 }
