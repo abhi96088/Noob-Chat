@@ -37,6 +37,7 @@ class AuthService {
           'photoUrl': user.photoURL ?? '',
           'createdAt': FieldValue.serverTimestamp()
         });
+        DatabaseServices().saveFcmToken(user.uid);
       }
 
       return user;
@@ -71,6 +72,7 @@ class AuthService {
           'photoUrl': user.photoURL ?? '',
           'createdAt': FieldValue.serverTimestamp()
         });
+        DatabaseServices().saveFcmToken(user.uid);
       }
 
       return user;

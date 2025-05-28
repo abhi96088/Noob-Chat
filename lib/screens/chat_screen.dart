@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +16,10 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+
+  bool _isEmojiVisible = false;
+  final FocusNode _focusNode = FocusNode();
+
   final TextEditingController _messageController = TextEditingController();
   final cUid = FirebaseAuth.instance.currentUser!.uid;
 
@@ -62,6 +69,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -145,22 +156,74 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             color: Colors.white,
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      hintText: 'Type a message...',
-                      border: InputBorder.none,
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.emoji_emotions),
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        setState(() {
+                          _isEmojiVisible = !_isEmojiVisible;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        focusNode: _focusNode,
+                        onTap: () {
+                          if (_isEmojiVisible) {
+                            setState(() {
+                              _isEmojiVisible = false;
+                            });
+                          }
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'Type a message...',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _sendMessage,
+                      icon: const Icon(Icons.send, color: Color(0xFF2E8BFF)),
+                    ),
+                  ],
+                ),
+                SafeArea(
+                  child: Offstage(
+                    offstage: !_isEmojiVisible,
+                    child: SizedBox(
+                      height: screenHeight * 0.35,
+                      width: screenWidth,
+                      child: EmojiPicker(
+                        onEmojiSelected: (category, emoji) {
+                          _messageController.text += emoji.emoji;
+                          _messageController.selection = TextSelection.fromPosition(
+                            TextPosition(offset: _messageController.text.length),
+                          );
+                        },
+                        config: Config(
+                          emojiViewConfig: EmojiViewConfig(
+                            emojiSizeMax: 32,
+                            columns: 8
+                          ),
+                          categoryViewConfig: CategoryViewConfig(
+                            categoryIcons: const CategoryIcons(),
+                            // Optional: Customize icons
+                          ),
+                          bottomActionBarConfig: BottomActionBarConfig(
+                            showBackspaceButton: true,
+                          ),
+                          skinToneConfig: SkinToneConfig(),
+                          searchViewConfig: SearchViewConfig(),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: _sendMessage,
-                  icon: const Icon(Icons.send, color: Color(0xFF2E8BFF)),
                 ),
               ],
             ),
